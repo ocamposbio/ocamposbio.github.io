@@ -10,7 +10,7 @@ status: draft
 
 ## tl;dr
 
-Comprei uma `IPC_XM210_X2-WR-T_S38` (Xiongmai, SoC RISC-V T-Head C906, flash NOR 8MB) pra fuçar. Consegui login no DVRIP com `admin` e senha vazia, descobri que o protocolo de upgrade grava qualquer coisa na flash, e cheguei a flashear um cramfs customizado na partição `mtd4`. Só que a rootfs é criptografada, o kernel não aparece no UART e meu hook de shell nunca disparou. O próximo passo é físico: dump da flash com CH341A.
+Comprei uma `IPC_XM210_X2-WR-T_S38` (Xiongmai, SoC RISC-V T-Head C906, flash NOR 8MB) para estudo de segurança de firmware. Consegui login no DVRIP com `admin` e senha vazia, descobri que o protocolo de upgrade grava qualquer coisa na flash, e cheguei a flashear um cramfs customizado na partição `mtd4`. Só que a rootfs é criptografada, o kernel não aparece no UART e meu hook de shell nunca disparou. O próximo passo é físico: dump da flash com CH341A.
 
 ## Hardware
 
@@ -40,13 +40,13 @@ mtd4: custom    832 KB   cramfs (configs/scripts) ← vetor de escrita
 mtd5: mtd       768 KB
 ```
 
-O que mudou o rumo do projeto foi descobrir que a partição `custom` é **gravável via DVRIP** e monta um cramfs. Ou seja: dava pra injetar código sem precisar quebrar a criptografia da rootfs.
+O que mudou o rumo do projeto foi descobrir que a partição `custom` é **gravável via DVRIP** e monta um cramfs. Ou seja: era possível injetar código sem quebrar a criptografia da rootfs.
 
 ## O que funcionou
 
 ### 1. Login DVRIP com admin vazio
 
-O hash XMMD5 da Xiongmai é fraquinho:
+O hash XMMD5 da Xiongmai é notavelmente fraco:
 
 ```python
 def xmmd5(password):
@@ -62,7 +62,7 @@ def xmmd5(password):
 O comando `OPSystemUpgrade` aceita um ZIP com `InstallDesc` + imagens `.img` e grava partições por índice. Com isso consegui:
 
 - construir e gravar um **cramfs customizado** em `mtd4`, com um `extapp.sh` tentando abrir shell;
-- gravar **u-boot.env** em `mtd0` (env_console / env_initsh), incluindo uma tentativa de `init=/bin/sh` pra pular o init normal;
+- gravar **u-boot.env** em `mtd0` (env_console / env_initsh), incluindo uma tentativa de `init=/bin/sh` para pular o init normal;
 - observar a câmera reiniciar ~114s depois do flash (a porta cai, o processo de reboot é visível).
 
 ### 3. UART 115200 — SPL boot visível
@@ -90,12 +90,12 @@ Decompress finish.
 | Kernel console via UART0 | Kernel usa **UART1** (`xmuart=1`), pinos ainda não tracejados na PCB |
 | Rootfs desencriptada | **download.img criptografada** — chave vive dentro do RTOS criptografado |
 
-Foi ficando circular: rootfs criptografada → precisava de shell → shell depende do kernel → kernel mudo no UART → precisava do dump da flash pra análise estática. Cada caminho fechava o anterior. A saída é tirar a flash da equação e ler direto no hardware.
+A situação ficou circular: rootfs criptografada → precisava de shell → shell depende do kernel → kernel mudo no UART → precisava do dump da flash para análise estática. Cada caminho bloqueava o anterior. O que resta é o acesso físico: ler a flash direto no hardware.
 
 ## Próximos passos (quando o CH341A chegar)
 
 1. **Dump da flash SPI NOR 8MB** com o CH341A (chip provavelmente uma Winbond/GigaDevice 8MB, SOIC-8 — pode precisar de clamp/SOIC-8 clip);
-2. Identificar partições no dump cru e extrair `download.img` pra análise estática **fora da câmera** (binwalk, unpack);
+2. Identificar partições no dump cru e extrair `download.img` para análise estática **fora da câmera** (binwalk, unpack);
 3. Localizar o u-boot real (`app`) e os bootargs hardcoded — desbloquear console de kernel via UART1;
 4. Confirmar o hook `extapp.sh` no `rcS` real e reflash do cramfs corrigido.
 
