@@ -1,0 +1,24 @@
+title: ocamposbio
+tagline: Field notes for people poking at things.
+description: Writeups de segurança, hardware hacking e notas de campo.
+author: ocamposbio
+lang: pt-BR
+
+# User site do GitHub Pages (ocamposbio.github.io) -> baseurl vazio
+baseurl: ""
+url: "https://ocamposbio.github.io"
+
+# Build
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+highlighter: rouge
+
+permalink: /:title/
+
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - .gitignore

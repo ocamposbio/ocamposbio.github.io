@@ -1,0 +1,48 @@
+---
+layout: default
+---
+
+<section class="hero win">
+  <div class="win-hdr">
+    <span class="win-title">~/ocamposbio — neofetch</span>
+    <span class="win-right">dark/light ready</span>
+  </div>
+  <div class="win-body">
+    <pre class="banner">                                               __    _     
+  ____  _________ _____ ___  ____  ____  _____/ /_  (_)___ 
+ / __ \/ ___/ __ `/ __ `__ \/ __ \/ __ \/ ___/ __ \/ / __ \
+/ /_/ / /__/ /_/ / / / / / / /_/ / /_/ (__  ) /_/ / / /_/ /
+\____/\___/\__,_/_/ /_/ /_/ .___/\____/____/_.___/_/\____/ 
+                         /_/                                </pre>
+    <div class="hero-lines">
+      <p><span class="prompt">$</span> whoami</p>
+      <p>security researcher · hardware hacking · field notes</p>
+      <p><span class="prompt">$</span> ls interests/</p>
+      <p>firmware · IoT · rf · tooling <span class="cursor">▊</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="win" style="margin-top:16px">
+  <div class="win-hdr">
+    <span class="win-title">~/writeups — {{ site.posts.size }} items</span>
+    <span class="win-right">$ ls -la</span>
+  </div>
+  <div class="win-body" style="padding:10px 18px">
+    <div class="wlist">
+      {% assign posts = site.posts %}
+      {% if posts.size == 0 %}
+      <span class="empty">no writeups yet — first one incoming</span>
+      {% endif %}
+      {% for post in posts %}
+      <a class="p-row" href="{{ post.url | relative_url }}" aria-label="Open writeup: {{ post.title }}">
+        <span class="p-perms">-rw-r--r--</span>
+        <span class="p-date">{{ post.date | date: "%Y-%m-%d" }}</span>
+        {% if post.status %}<span class="p-status {{ post.status }}">{{ post.status }}</span>{% else %}<span class="p-status published">published</span>{% endif %}
+        <span class="p-title">{{ post.title }}</span>
+        <span class="p-arr">→</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>

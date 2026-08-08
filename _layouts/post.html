@@ -1,0 +1,24 @@
+---
+layout: default
+---
+
+<article class="post win">
+  <div class="win-hdr">
+    <span class="win-title">$ cat {{ page.url | remove_first: '/' }}</span>
+    <span class="win-right">{{ page.date | date: "%Y-%m-%d" }}{% if page.status %} · {{ page.status }}{% endif %}</span>
+  </div>
+  <div class="win-body">
+    <h1 class="post-title">{{ page.title }}</h1>
+    {% if page.subtitle %}<p class="post-subtitle">{{ page.subtitle }}</p>{% endif %}
+
+    <hr class="post-rule">
+
+    <div class="post-body">
+      {{ content }}
+    </div>
+
+    <nav class="post-nav">
+      <a class="post-back" href="{{ '/' | relative_url }}">← $ cd ~/</a>
+    </nav>
+  </div>
+</article>
